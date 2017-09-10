@@ -29,15 +29,32 @@ def showRoot():
     # print loggedInStatus
     if 'username' not in login_session:
         loggedInStatus = False
+        login_session['state'] = ''
+        login_session['email'] = ''
+        login_session['state'] = ''
+        login_session['gplus_id'] = ''
+        login_session['access_token'] = ''
         access_token = ""
     else:
         loggedInStatus = True
         access_token = login_session['access_token']
 
-    print login_session
-
     login_session['state'] = state
+
     return render_template('index.html', STATE=state, login_session=login_session, access_token=access_token, loggedInStatus=loggedInStatus)
+
+
+@app.route('/clear')
+def makeClear():
+    del login_session['access_token']
+    del login_session['user_id']
+    del login_session['gplus_id']
+    del login_session['username']
+    del login_session['email']
+    del login_session['picture']
+
+    print login_session
+    return "Okay"
 
 
 ### Actually complex GLogin
@@ -71,6 +88,7 @@ def gconnect():
         response = make_response(
             json.dumps('Failed to upgrade the authorization code.'), 401)
         response.headers['Content-Type'] = 'application/json'
+        print "Here"
         return response
 
     print "1234"
@@ -164,8 +182,7 @@ def gdisconnect():
         response.headers['Content-Type'] = 'application/json'
         # return response
         loggedInStatus = False
-        print "ABC 12345"
-        return redirect(url_for('showRoot', loggedInStatus=loggedInStatus))
+        return redirect('/')
     url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % access_token
     h = httplib2.Http()
     result = h.request(url, 'GET')[0]
@@ -187,7 +204,7 @@ def gdisconnect():
         print "ABC 123"
         loggedInStatus = False
         # return render_template('index.html', loggedInStatus=loggedInStatus)
-        return redirect(url_for('showRoot'))
+        return redirect('/')
     else:
         # For whatever reason, the given token was invalid.
         # del login_session

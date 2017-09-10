@@ -76,6 +76,9 @@
               } else {
                 $('#result').html('Failed to make a server-side call. Check your configuration and console.');
               }
+            },
+            error: function() {
+              console.log("Error")
             }
           })
         }
